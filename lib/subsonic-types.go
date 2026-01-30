@@ -1,4 +1,4 @@
-package middleware
+package lib
 
 type SubsonicError struct {
 	Code    int    `json:"code"`

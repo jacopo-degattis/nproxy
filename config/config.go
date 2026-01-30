@@ -5,9 +5,27 @@ import (
 )
 
 var Env = map[string]string{
-	"NAVIDROME_URL": os.Getenv("NAVIDROME_URL"),
-	"DAB_ENDPOINT":  os.Getenv("DAB_ENDPOINT"),
-	"VERSION":       "1.0.0",
+	"REDIS_URL":      os.Getenv("REDIS_DB"),
+	"REDIS_PASSWORD": os.Getenv("REDIS_PASSWORD"),
+	"NAVIDROME_URL":  os.Getenv("NAVIDROME_URL"),
+	"DAB_ENDPOINT":   os.Getenv("DAB_ENDPOINT"),
+	"VERSION":        "1.0.0",
+}
+
+func GetRedisUrl() string {
+	redisUrl := Env["REDIS_URL"]
+	if redisUrl != "" {
+		return redisUrl
+	}
+	return "localhost:6379"
+}
+
+func GetRedisPassword() *string {
+	redisPassword := Env["REDIS_PASSWORD"]
+	if redisPassword != "" {
+		return &redisPassword
+	}
+	return nil
 }
 
 func GetDabEndpoint() string {
