@@ -13,10 +13,6 @@ import (
 
 var mwClient http.Client = http.Client{}
 
-var ROUTE_LOGIN = "/auth/login"
-var ROUTE_API = "/api/*path"
-var SUBSONIC_REST = "/rest/*path"
-
 // Global and root structure
 type NavidromeMiddleware struct {
 	Provider *NavidromeExtProvider
@@ -33,8 +29,10 @@ func NewMiddleware(provider *NavidromeExtProvider) *NavidromeMiddleware {
 
 	// Register all handlers from the given provider
 	for _, pr := range provider.Handlers {
-		slog.Info(fmt.Sprintf("Registering handler for endpoint: %s", pr.SrcPath))
-		server.Method(pr.Method, pr.SrcPath, pr.HandlerWithContext())
+		slog.Info(fmt.Sprintf("Registering handler for endpoints: %v", pr.SrcPaths))
+		for _, srcPath := range pr.SrcPaths {
+			server.Method(pr.Method, srcPath, pr.HandlerWithContext())
+		}
 	}
 
 	return &NavidromeMiddleware{
@@ -43,10 +41,12 @@ func NewMiddleware(provider *NavidromeExtProvider) *NavidromeMiddleware {
 	}
 }
 
-// TODO: add options for host and port for example
 func (mw *NavidromeMiddleware) RunServer() {
-	slog.Info("Listening on port 3000...")
-	if err := http.ListenAndServe(":3000", mw.Server); err != nil {
+	host := config.GetHost()
+	port := config.GetPort()
+
+	slog.Info(fmt.Sprintf("Listening on %s:%s...", host, port))
+	if err := http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), mw.Server); err != nil {
 		log.Fatalf("failed to run server: %v", err)
 	}
 }
@@ -97,8 +97,11 @@ func ForwardRequest(w http.ResponseWriter, r *http.Request) []byte {
 	return body
 }
 
+// Middleware used to forward requests of endpoint i'm not intercepting (not acting as middlware on them)
 func ForwardMiddleware() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("[+] Forwarding request %s\n", r.URL.String())
+
 		body := ForwardRequest(w, r)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(body)

@@ -23,8 +23,39 @@ type Track struct {
 	Size     int    `json:"size"`
 	Suffix   string `json:"suffix"`
 	Duration int    `json:"duration"`
-	Bitrate  int    `json:"birate"`
-	Bitdepth int    `json:"bitdepth"`
+	Bitrate  int    `json:"bitRate"`
+	Bitdepth int    `json:"bitDepth"`
+}
+
+type SubsonicTrack struct {
+	Track
+	Parent             string   `json:"parent"`
+	IsDir              bool     `json:"isDir"`
+	CovertArt          string   `json:"coverArt"`
+	ContentType        string   `json:"contentType"`
+	Suffix             string   `json:"suffix"`
+	Path               string   `json:"path"`
+	Created            string   `json:"created"`
+	Type               string   `json:"type"`
+	IsVideo            bool     `json:"isVideo"`
+	Bpm                int      `json:"bpm"`
+	Comment            string   `json:"comment"`
+	SortName           string   `json:"sortName"`
+	MediaType          string   `json:"mediaType"`
+	MusicBrainzId      string   `json:"musicBrainzId"`
+	Isrc               []any    `json:"isrc"`
+	Genres             []string `json:"genres"`
+	ReplayGain         any      `json:"replayGain"`
+	ChannelCount       int      `json:"channelCount"`
+	SamplingRate       int      `json:"samplingRate"`
+	Moods              []any    `json:"moods"`
+	Artists            []any    `json:"artists"`
+	DisplayArtist      string   `json:"displayArtist"`
+	AlbumArtists       []any    `json:"albumArtists"`
+	DisplayAlbumArtist string   `json:"displayAlbumArtist"`
+	Contributors       []any    `json:"contributors"`
+	DisplayComposer    string   `json:"displayComposer"`
+	ExplicitStatus     string   `json:"explicitStatus"`
 }
 
 type NavidromeTrack struct {

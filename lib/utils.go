@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 // Make `dstMap` inherit all fields from parent map `parentMap`
@@ -14,18 +15,27 @@ func mapInherit(parentMap map[string]any, dstMap map[string]any) {
 }
 
 // This function should be moved inside the middlewares package
-func Fetch(url string, method string, body io.Reader, header http.Header) ([]byte, error) {
+// TODO: improve function stability and reliability
+func Fetch(
+	url string,
+	method string,
+	body io.Reader,
+	header http.Header,
+	params url.Values,
+) ([]byte, error) {
 	client := http.Client{}
 
 	req, err := http.NewRequest(method, url, body)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
 
-	// token := header.Get("x-nd-authorization")
-
-	// fmt.Printf("TOKEN = %s", token)
-
-	// if token != "" {
-	// 	req.Header.Add("x-nd-authorization", token)
-	// }
+	// add params if present
+	if params != nil {
+		currentQuery := req.URL.Query()
+		for k, v := range params {
+			currentQuery.Add(k, v[0])
+		}
+		req.URL.RawQuery = currentQuery.Encode()
+	}
 
 	if err != nil {
 		panic(err)
@@ -47,6 +57,7 @@ func Fetch(url string, method string, body io.Reader, header http.Header) ([]byt
 	return resBody, nil
 }
 
+// TODO: replace all if != nil in the code calling this function instead
 func CheckError(w http.ResponseWriter, err error) {
 	if err != nil {
 		responseError := BuildSubsonicError(0, err.Error())

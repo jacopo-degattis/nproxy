@@ -1,4 +1,4 @@
-package dabmusic
+package types
 
 type DabTrack struct {
 	Id          int    `json:"id"`

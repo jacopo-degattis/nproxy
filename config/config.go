@@ -5,11 +5,31 @@ import (
 )
 
 var Env = map[string]string{
+	// Host is the host to run the server onto (ex. localhost)
+	"HOST": os.Getenv("HOST"),
+	// Port is the port to run the server onto (ex. 3000)
+	"PORT":           os.Getenv("PORT"),
 	"REDIS_URL":      os.Getenv("REDIS_DB"),
 	"REDIS_PASSWORD": os.Getenv("REDIS_PASSWORD"),
 	"NAVIDROME_URL":  os.Getenv("NAVIDROME_URL"),
 	"DAB_ENDPOINT":   os.Getenv("DAB_ENDPOINT"),
 	"VERSION":        "1.0.0",
+}
+
+func GetHost() string {
+	host := Env["HOST"]
+	if host != "" {
+		return host
+	}
+	return "localhost"
+}
+
+func GetPort() string {
+	port := Env["PORT"]
+	if port != "" {
+		return port
+	}
+	return "3000"
 }
 
 func GetRedisUrl() string {

@@ -9,9 +9,6 @@ import (
 	dabmusicMiddleware "nproxy/middlewares/dabmusic"
 )
 
-// This must stay FIXED in order to support navidrome and subsonic clients
-var ROUTE_LOGIN = "/auth/login"
-
 func main() {
 	if config.GetNavidromeUrl() == "" {
 		log.Fatal("you should set a valid `NAVIDROME_URL` env variable.")

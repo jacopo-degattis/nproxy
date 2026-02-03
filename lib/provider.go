@@ -7,8 +7,8 @@ import (
 
 type ProviderHandler struct {
 	Method   string
-	SrcPath  string // path we want to intercept of navidrome or subsonic api
-	DstPath  string // path of the route we want to forward our request to
+	SrcPaths []string // paths we want to intercept of navidrome or subsonic api
+	DstPath  string   // path of the route we want to forward our request to
 	Handler  http.HandlerFunc
 	Provider *NavidromeExtProvider
 }
