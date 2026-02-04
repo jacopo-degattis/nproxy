@@ -47,7 +47,7 @@ func (d *DabClient) Search(query string, queryType string) ([]dabtypes.DabTrack,
 	err = json.NewDecoder(bytes.NewReader(res)).Decode(&response)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode dabmusic response for endpoint %s", "/api/search")
+		return nil, fmt.Errorf("unable to decode dabmusic response for endpoint /api/search: %s", err.Error())
 	}
 
 	return response.Tracks, nil
@@ -99,4 +99,37 @@ func (d *DabClient) GetTrackStreamUrl(trackId string) (*string, error) {
 	}
 
 	return &response.Url, nil
+}
+
+func (d *DabClient) GetAlbumInfo(albumId string) (*dabtypes.DabAlbum, error) {
+	type AlbumInfoResponse struct {
+		Album dabtypes.DabAlbum `json:"album"`
+	}
+
+	fullPath := fmt.Sprintf(
+		"%s/api/album?albumId=%s",
+		d.BaseUrl,
+		albumId,
+	)
+
+	res, err := lib.Fetch(
+		fullPath,
+		"GET",
+		nil,
+		nil,
+		nil,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var response AlbumInfoResponse
+	err = json.NewDecoder(bytes.NewReader(res)).Decode(&response)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Album, nil
 }

@@ -7,13 +7,6 @@ import (
 	"net/url"
 )
 
-// Make `dstMap` inherit all fields from parent map `parentMap`
-func mapInherit(parentMap map[string]any, dstMap map[string]any) {
-	for key, value := range parentMap {
-		dstMap[key] = value
-	}
-}
-
 // This function should be moved inside the middlewares package
 // TODO: improve function stability and reliability
 func Fetch(

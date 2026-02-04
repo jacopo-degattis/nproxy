@@ -31,7 +31,7 @@ func NewMiddleware(provider *NavidromeExtProvider) *NavidromeMiddleware {
 	for _, pr := range provider.Handlers {
 		slog.Info(fmt.Sprintf("Registering handler for endpoints: %v", pr.SrcPaths))
 		for _, srcPath := range pr.SrcPaths {
-			server.Method(pr.Method, srcPath, pr.HandlerWithContext())
+			server.Method(pr.Method, srcPath, pr.Handler)
 		}
 	}
 
@@ -39,6 +39,14 @@ func NewMiddleware(provider *NavidromeExtProvider) *NavidromeMiddleware {
 		Provider: provider,
 		Server:   server,
 	}
+}
+
+func (mw *NavidromeMiddleware) AddRoute(
+	method string,
+	path string,
+	handler http.HandlerFunc,
+) {
+	mw.Server.Method(method, path, handler)
 }
 
 func (mw *NavidromeMiddleware) RunServer() {

@@ -16,8 +16,6 @@ func ApiSong(
 	r *http.Request,
 	client *client.DabClient,
 ) {
-	// var dstPath = r.Context().Value("DstPath").(string)
-
 	userQuery := r.URL.Query().Get("title")
 
 	if userQuery == "" {

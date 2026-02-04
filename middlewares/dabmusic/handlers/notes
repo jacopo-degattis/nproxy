@@ -1,0 +1,7 @@
+How to add songs to same library of navidrome?
+
+When I create the docker contains I should use as music library a shared storage.
+So for example I can run the navidrome container with the library pointing at /music mounted from ./music and I should point the same folder for the nproxy middleware so when it downloads the track it's added to that folder.
+
+
+When I put the artist id from an external source inside the SubsonicResponse I should always put the "ext-" kind of format so that when it fetches the /rest/album with the albumId I can recognize it and act accordingly fetching infos from remote provider

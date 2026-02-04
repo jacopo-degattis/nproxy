@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"nproxy/lib"
@@ -13,6 +14,9 @@ func Stream(
 	r *http.Request,
 	client *client.DabClient,
 ) {
+	fmt.Println("/rest/stream requested")
+	fmt.Printf("Plain url: %s\n", r.URL.String())
+
 	trackId := r.URL.Query().Get("id")
 
 	isExternal := strings.Contains(trackId, "ext")

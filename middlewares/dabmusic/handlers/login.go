@@ -14,8 +14,6 @@ import (
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	fullUrl := fmt.Sprintf("%s%s", config.GetNavidromeUrl(), "/auth/login")
 
-	fmt.Println("WE MADE IT!!!")
-
 	defer r.Body.Close()
 	res, err := lib.Fetch(fullUrl, "POST", r.Body, r.Header, nil)
 
