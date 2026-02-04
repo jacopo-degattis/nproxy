@@ -2,7 +2,7 @@ package dabmusic
 
 import (
 	"net/http"
-	"nproxy/lib"
+	lib "nproxy/server"
 
 	client "nproxy/middlewares/dabmusic/client"
 	handlers "nproxy/middlewares/dabmusic/handlers"

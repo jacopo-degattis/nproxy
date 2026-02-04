@@ -2,8 +2,8 @@ package utils
 
 import (
 	"fmt"
-	libTypes "nproxy/lib"
 	dabtypes "nproxy/middlewares/dabmusic/types"
+	libTypes "nproxy/server"
 	"strconv"
 )
 

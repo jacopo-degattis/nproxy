@@ -3,10 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"nproxy/lib"
 
 	client "nproxy/middlewares/dabmusic/client"
 	utils "nproxy/middlewares/dabmusic/utils"
+	"nproxy/server"
 )
 
 // /rest/search3 & /rest/search3.view
@@ -19,7 +19,7 @@ func Search3Handler(
 	userQuery := r.URL.Query().Get("query")
 
 	if userQuery == "\"\"" {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -30,14 +30,14 @@ func Search3Handler(
 	)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
 	}
 
 	if len(tracks) == 0 {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -46,7 +46,7 @@ func Search3Handler(
 	encoded, err := json.Marshal(res)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, "Unable to decode response from dabmusic")
+		error := server.BuildSubsonicError(0, "Unable to decode response from dabmusic")
 		w.WriteHeader(500)
 		w.Write(error)
 		return

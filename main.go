@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 	"nproxy/config"
-	"nproxy/lib"
 	"nproxy/redisdb"
+	lib "nproxy/server"
 	"os"
 
 	downloader "nproxy/downloader"

@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"nproxy/lib"
 	"nproxy/middlewares/dabmusic/client"
 	"nproxy/middlewares/dabmusic/utils"
+	"nproxy/server"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func GetAlbum(
 
 	// If it's not an external resource than just forward the request and return
 	if albumId == "" || !strings.Contains(albumId, "ext-") {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -29,7 +29,7 @@ func GetAlbum(
 	album, err := client.GetAlbumInfo(parsedAlbumId)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
@@ -39,7 +39,7 @@ func GetAlbum(
 	encoded, err := json.Marshal(res)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, "Unable to decode response from dabmusic")
+		error := server.BuildSubsonicError(0, "Unable to decode response from dabmusic")
 		w.WriteHeader(500)
 		w.Write(error)
 		return

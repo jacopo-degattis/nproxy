@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"nproxy/lib"
+	lib "nproxy/server"
 
 	dabtypes "nproxy/middlewares/dabmusic/types"
 )

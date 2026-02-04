@@ -3,9 +3,9 @@ package handlers
 import (
 	"errors"
 	"net/http"
-	"nproxy/lib"
 	"nproxy/middlewares/dabmusic/client"
 	"nproxy/redisdb"
+	"nproxy/server"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
@@ -26,7 +26,7 @@ func GetCoverArt(
 
 	// If not external id then let navidrome handle it
 	if !isExternal {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -39,7 +39,7 @@ func GetCoverArt(
 	if !errors.Is(redisCmd.Err(), redis.Nil) {
 		cachedImg, err := redisCmd.Bytes()
 		if err != nil {
-			error := lib.BuildSubsonicError(0, err.Error())
+			error := server.BuildSubsonicError(0, err.Error())
 			w.Write(error)
 			return
 		}
@@ -51,18 +51,18 @@ func GetCoverArt(
 	metadata, err := client.GetTrackMetadata(externalTrackId[2])
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.Write(error)
 		return
 	}
 
-	metadataBytes, err := lib.Fetch(metadata.Cover, "GET", nil, nil, nil)
+	metadataBytes, err := server.Fetch(metadata.Cover, "GET", nil, nil, nil)
 
 	// Store the img in cache now
 	redisdb.Set(externalTrackId[2], metadataBytes)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.Write(error)
 		return
 	}

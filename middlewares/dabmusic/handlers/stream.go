@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"nproxy/lib"
 	"nproxy/middlewares/dabmusic/client"
+	"nproxy/server"
 	"strings"
 )
 
@@ -22,7 +22,7 @@ func Stream(
 	isExternal := strings.Contains(trackId, "ext")
 
 	if !isExternal {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -32,7 +32,7 @@ func Stream(
 	streamUrl, err := client.GetTrackStreamUrl(externalTrackId[2])
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
@@ -43,7 +43,7 @@ func Stream(
 	req, err := http.NewRequest("GET", *streamUrl, nil)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
@@ -52,7 +52,7 @@ func Stream(
 	streamResponse, err := cl.Do(req)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
@@ -62,7 +62,7 @@ func Stream(
 	resBody, err := io.ReadAll(streamResponse.Body)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
