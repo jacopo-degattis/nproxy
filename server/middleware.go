@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"nproxy/config"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -19,13 +20,31 @@ type NavidromeMiddleware struct {
 	Server   *chi.Mux
 }
 
-func NewMiddleware(provider *NavidromeExtProvider) *NavidromeMiddleware {
+type NavidromeExtProviderOptions struct {
+	// I make available a function to handle the /<PROVIDER>/download route
+	// which is created by default when the middleware is created
+	// if nil then the route is not created at all
+	DownloadHandler http.HandlerFunc
+}
+
+func NewMiddleware(
+	provider *NavidromeExtProvider,
+	options *NavidromeExtProviderOptions,
+) *NavidromeMiddleware {
 	server := chi.NewRouter()
 	slog.Info(fmt.Sprintf("Using provider: %s", provider.Name))
 
 	// Forward all requests by default then if user
 	// registers it's own provider proceed to override
 	server.Handle("/*", ForwardMiddleware())
+
+	if options != nil && options.DownloadHandler != nil {
+		path := fmt.Sprintf("/%s/download", strings.ToLower(provider.Name))
+		slog.Info(fmt.Sprintf("Registering handler for server download at %s", path))
+
+		// If we have a download handler then register it
+		server.Handle(path, options.DownloadHandler)
+	}
 
 	// Register all handlers from the given provider
 	for _, pr := range provider.Handlers {

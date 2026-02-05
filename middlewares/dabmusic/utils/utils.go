@@ -2,10 +2,23 @@ package utils
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	dabtypes "nproxy/middlewares/dabmusic/types"
 	libTypes "nproxy/server"
+	"os"
 	"strconv"
+
+	"go.senan.xyz/taglib"
 )
+
+func DirExists(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return err == nil && info.IsDir()
+}
 
 type AlbumResult struct {
 	libTypes.SubsonicResponseAlbumDto
@@ -263,4 +276,45 @@ func DabToNavidromeTrack(
 		Createdat: track.ReleaseDate,
 		Updatedat: track.ReleaseDate,
 	}
+}
+
+func AddMetadata(targetFile string, track *dabtypes.DabTrack) error {
+	// res, err := _request(metadatas.Cover, false, []QueryParams{})
+	req, err := http.NewRequest("GET", track.Cover, nil)
+	if err != nil {
+		return fmt.Errorf("can't download cover")
+	}
+
+	cli := http.Client{}
+	res, err := cli.Do(req)
+	if err != nil {
+		return fmt.Errorf("can't download cover")
+	}
+	defer res.Body.Close()
+
+	coverBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	err = taglib.WriteTags(targetFile, map[string][]string{
+		taglib.Title:  {track.Title},
+		taglib.Artist: {track.Artist},
+		taglib.Album:  {track.Album},
+		taglib.Date:   {track.ReleaseDate},
+	}, 0)
+
+	if err != nil {
+		return fmt.Errorf("unable to write metadata to track")
+	}
+
+	if len(coverBytes) > 0 {
+		err = taglib.WriteImage(targetFile, coverBytes)
+	}
+
+	if err != nil {
+		return fmt.Errorf("unable to picture meadata to track")
+	}
+
+	return nil
 }
