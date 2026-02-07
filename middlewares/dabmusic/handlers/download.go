@@ -37,6 +37,12 @@ func downloadTrack(
 	return nil
 }
 
+func sanitizeName(name string) string {
+	noSpace := strings.TrimSpace(name)
+	newName := strings.ToLower(strings.ReplaceAll(noSpace, " ", "_"))
+	return newName
+}
+
 // Route to download tracks or albums (in future also artists) from dabmusic onto the server
 func DownloadHandler(
 	w http.ResponseWriter,
@@ -60,10 +66,13 @@ func DownloadHandler(
 	}
 	switch downloadType {
 	case "album":
+		fmt.Println("Getting inside the GetAlbumInfo...")
 		albumInfos, error := client.GetAlbumInfo(resId)
 
+		fmt.Printf("Downloading: %s\n", albumInfos.Title)
+
 		artistFolder := strings.ToLower(strings.ReplaceAll(albumInfos.Artist, " ", "_"))
-		albumFolder := strings.ToLower(strings.ReplaceAll(albumInfos.Title, " ", "_"))
+		albumFolder := sanitizeName(albumInfos.Title)
 		fullAlbumDownloadPath := fmt.Sprintf("%s/%s/", artistFolder, albumFolder)
 
 		if !utils.DirExists(fullAlbumDownloadPath) {

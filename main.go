@@ -35,6 +35,7 @@ func main() {
 
 	// Define the provider
 	dabMusicProvider := dabmusicMiddleware.DabMusicProvider()
+	// squidWtfProvider := squidWtfMiddleware.SquidWtfProvider()
 
 	// Now, for example purposes using the dabmusic provider
 	mw := lib.NewMiddleware(dabMusicProvider, &lib.NavidromeExtProviderOptions{

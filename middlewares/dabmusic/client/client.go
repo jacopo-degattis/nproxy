@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	lib "nproxy/server"
 
@@ -106,6 +107,7 @@ func (d *DabClient) GetAlbumInfo(albumId string) (*dabtypes.DabAlbum, error) {
 		Album dabtypes.DabAlbum `json:"album"`
 	}
 
+	fmt.Println("Fetching endpoint...")
 	fullPath := fmt.Sprintf(
 		"%s/api/album?albumId=%s",
 		d.BaseUrl,
@@ -116,9 +118,14 @@ func (d *DabClient) GetAlbumInfo(albumId string) (*dabtypes.DabAlbum, error) {
 		fullPath,
 		"GET",
 		nil,
-		nil,
+		http.Header{
+			"User-Agent": []string{
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+			},
+		},
 		nil,
 	)
+	fmt.Println("Fetched!")
 
 	if err != nil {
 		return nil, err
@@ -126,6 +133,8 @@ func (d *DabClient) GetAlbumInfo(albumId string) (*dabtypes.DabAlbum, error) {
 
 	var response AlbumInfoResponse
 	err = json.NewDecoder(bytes.NewReader(res)).Decode(&response)
+
+	fmt.Print("Decoded!")
 
 	if err != nil {
 		return nil, err
