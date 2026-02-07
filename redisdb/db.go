@@ -10,7 +10,7 @@ import (
 var client *redis.Client
 var ctx = context.Background()
 
-func InitRedisClient() {
+func InitRedisClient() error {
 	addr := config.GetRedisUrl()
 	password := config.GetRedisPassword()
 
@@ -24,6 +24,9 @@ func InitRedisClient() {
 	}
 
 	client = redis.NewClient(options)
+
+	// check if the connection was succesfull or not
+	return client.Ping(ctx).Err()
 }
 
 func Set(key string, value any) error {

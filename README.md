@@ -1,4 +1,4 @@
-# NaviMW
+# Nproxy
 
 ## Description
 Navidrome middleware to fetch songs and data from remote provider if not locally found 
@@ -8,7 +8,7 @@ Navidrome middleware to fetch songs and data from remote provider if not locally
 Here's a description of the most important folders and files in the project.
 
 ```
-├── lib/
+├── server/
 ├── middlewares/
 ├── redisdb/
 ```

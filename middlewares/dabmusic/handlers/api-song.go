@@ -3,10 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"nproxy/lib"
-	libTypes "nproxy/lib"
 	"nproxy/middlewares/dabmusic/client"
 	utils "nproxy/middlewares/dabmusic/utils"
+	"nproxy/server"
+	libTypes "nproxy/server"
 )
 
 // api/song
@@ -16,14 +16,12 @@ func ApiSong(
 	r *http.Request,
 	client *client.DabClient,
 ) {
-	// var dstPath = r.Context().Value("DstPath").(string)
-
 	userQuery := r.URL.Query().Get("title")
 
 	if userQuery == "" {
 		// If the client doesn't provide any title to query than just return
 		// the default navidrome response
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -34,14 +32,14 @@ func ApiSong(
 	)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
 	}
 
 	if len(tracks) == 0 {
-		res := lib.ForwardRequest(w, r)
+		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
@@ -54,7 +52,7 @@ func ApiSong(
 	encoded, err := json.Marshal(responseTracks)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, "Unable to decode response from dabmusic")
+		error := server.BuildSubsonicError(0, "Unable to decode response from dabmusic")
 		w.WriteHeader(500)
 		w.Write(error)
 		return

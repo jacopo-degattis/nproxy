@@ -3,31 +3,30 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-
-	client "nproxy/middlewares/dabmusic/client"
-	utils "nproxy/middlewares/dabmusic/utils"
+	"nproxy/middlewares/dabmusic/client"
+	"nproxy/middlewares/dabmusic/utils"
 	"nproxy/server"
+	"strings"
 )
 
-// /rest/search3 & /rest/search3.view
-func Search3Handler(
+func GetAlbum(
 	w http.ResponseWriter,
 	r *http.Request,
 	client *client.DabClient,
 ) {
+	albumId := r.URL.Query().Get("id")
 
-	userQuery := r.URL.Query().Get("query")
-
-	if userQuery == "\"\"" {
+	// If it's not an external resource than just forward the request and return
+	if albumId == "" || !strings.Contains(albumId, "ext-") {
 		res := server.ForwardRequest(w, r)
 		w.Write(res)
 		return
 	}
 
-	tracks, err := client.Search(
-		userQuery,
-		"track",
-	)
+	splits := strings.Split(albumId, "-")
+	parsedAlbumId := splits[2]
+
+	album, err := client.GetAlbumInfo(parsedAlbumId)
 
 	if err != nil {
 		error := server.BuildSubsonicError(0, err.Error())
@@ -36,13 +35,7 @@ func Search3Handler(
 		return
 	}
 
-	if len(tracks) == 0 {
-		res := server.ForwardRequest(w, r)
-		w.Write(res)
-		return
-	}
-
-	res := utils.DabToSubsonicTrack(tracks)
+	res := utils.DabToSubsonicAlbum(*album)
 	encoded, err := json.Marshal(res)
 
 	if err != nil {

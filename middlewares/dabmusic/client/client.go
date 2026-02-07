@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
-	"nproxy/lib"
+	lib "nproxy/server"
 
 	dabtypes "nproxy/middlewares/dabmusic/types"
 )
@@ -47,7 +48,7 @@ func (d *DabClient) Search(query string, queryType string) ([]dabtypes.DabTrack,
 	err = json.NewDecoder(bytes.NewReader(res)).Decode(&response)
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to decode dabmusic response for endpoint %s", "/api/search")
+		return nil, fmt.Errorf("unable to decode dabmusic response for endpoint /api/search: %s", err.Error())
 	}
 
 	return response.Tracks, nil
@@ -99,4 +100,45 @@ func (d *DabClient) GetTrackStreamUrl(trackId string) (*string, error) {
 	}
 
 	return &response.Url, nil
+}
+
+func (d *DabClient) GetAlbumInfo(albumId string) (*dabtypes.DabAlbum, error) {
+	type AlbumInfoResponse struct {
+		Album dabtypes.DabAlbum `json:"album"`
+	}
+
+	fmt.Println("Fetching endpoint...")
+	fullPath := fmt.Sprintf(
+		"%s/api/album?albumId=%s",
+		d.BaseUrl,
+		albumId,
+	)
+
+	res, err := lib.Fetch(
+		fullPath,
+		"GET",
+		nil,
+		http.Header{
+			"User-Agent": []string{
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+			},
+		},
+		nil,
+	)
+	fmt.Println("Fetched!")
+
+	if err != nil {
+		return nil, err
+	}
+
+	var response AlbumInfoResponse
+	err = json.NewDecoder(bytes.NewReader(res)).Decode(&response)
+
+	fmt.Print("Decoded!")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.Album, nil
 }

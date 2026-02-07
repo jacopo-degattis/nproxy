@@ -7,20 +7,18 @@ import (
 	"fmt"
 	"net/http"
 	"nproxy/config"
-	"nproxy/lib"
+	"nproxy/server"
 )
 
 // /auth/login
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	fullUrl := fmt.Sprintf("%s%s", config.GetNavidromeUrl(), "/auth/login")
 
-	fmt.Println("WE MADE IT!!!")
-
 	defer r.Body.Close()
-	res, err := lib.Fetch(fullUrl, "POST", r.Body, r.Header, nil)
+	res, err := server.Fetch(fullUrl, "POST", r.Body, r.Header, nil)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return
@@ -30,7 +28,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(bytes.NewReader(res)).Decode(&rawBody)
 
 	if err != nil {
-		error := lib.BuildSubsonicError(0, err.Error())
+		error := server.BuildSubsonicError(0, err.Error())
 		w.WriteHeader(500)
 		w.Write(error)
 		return

@@ -1,4 +1,54 @@
-package lib
+package server
+
+import "net/http"
+
+// Type for http.HandlerFunc
+type HttpHandlerFunc = func(w http.ResponseWriter, r *http.Request)
+
+type SubsonicError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type SubsonicResponse struct {
+	Status        string `json:"status"`
+	Version       string `json:"version"`
+	Type          string `json:"type"`
+	ServerVersion string `json:"serverVersion"`
+	OpenSubsonic  bool   `json:"openSubsonic"`
+}
+
+type SubsonicResponseAlbumDto struct {
+	Id                  string   `json:"id"`
+	Name                string   `json:"name"`
+	Artist              string   `json:"artist"`
+	ArtistId            string   `json:"artistId"`
+	CoverArt            string   `json:"coverArt"`
+	SongCount           int      `json:"songCount"`
+	Duration            int      `json:"duration"`
+	PlayCount           int      `json:"playCount"`
+	Created             string   `json:"created"`
+	Year                int      `json:"year"`
+	Played              string   `json:"played"`
+	UserRating          int      `json:"userRating"`
+	Genres              []string `json:"genres"`
+	MusicBrainzId       string   `json:"musicBrainzId"`
+	IsCompilation       bool     `json:"isCompilation"`
+	SortName            string   `json:"sortName"`
+	DiscTitles          []string `json:"discTitles"`
+	OriginalReleaseDate any      `json:"originalReleaseDate"`
+	ReleaseDate         any      `json:"releaseDate"`
+	ReleaseTypes        []any    `json:"releaseTypes"`
+	RecordLabels        []string `json:"recordLabels"`
+	Moods               []string `json:"moods"`
+	Artists             []any    `json:"artists"`
+}
+
+type SubsnicResponseDto struct {
+	Status  string        `json:"status"`
+	Version string        `json:"version"`
+	Error   SubsonicError `json:"error"`
+}
 
 type TrackAlbumArtist struct {
 	Id      string `json:"id"`
@@ -16,10 +66,10 @@ type Track struct {
 	Path     string `json:"path"`
 	Title    string `json:"title"`
 	Album    string `json:"album"`
-	ArtistId string `json:"artistId"`
+	ArtistId int    `json:"artistId"`
 	Artist   string `json:"artist"`
 	AlbumId  string `json:"albumId"`
-	Year     string `json:"year"`
+	Year     int    `json:"year"`
 	Size     int    `json:"size"`
 	Suffix   string `json:"suffix"`
 	Duration int    `json:"duration"`

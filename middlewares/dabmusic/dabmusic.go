@@ -2,96 +2,14 @@ package dabmusic
 
 import (
 	"net/http"
-	"nproxy/lib"
+	lib "nproxy/server"
 
 	client "nproxy/middlewares/dabmusic/client"
 	handlers "nproxy/middlewares/dabmusic/handlers"
-	dabtypes "nproxy/middlewares/dabmusic/types"
 )
 
 var dabClient = client.DabClient{
 	BaseUrl: "https://dabmusic.xyz",
-}
-
-func MiddlewareApiLoginNavidrome(provider *lib.NavidromeExtProvider) lib.ProviderHandler {
-	apiLoginNavidromeHandler := lib.ProviderHandler{
-		Method:   "POST",
-		SrcPaths: []string{"/auth/login"},
-		DstPath:  "", // TODO: this should be also settable to null to avoid automatic forward to that endpoint
-		Provider: provider,
-	}
-
-	apiLoginNavidromeHandler.Handler = handlers.LoginHandler
-
-	return apiLoginNavidromeHandler
-}
-
-func MiddlewareRestSearch3Subsonic(provider *lib.NavidromeExtProvider) lib.ProviderHandler {
-	apiRestSearch3Subsonic := lib.ProviderHandler{
-		Method:   "GET",
-		SrcPaths: []string{"/rest/search3.view", "/rest/search3"},
-		DstPath:  "/api/search",
-		Provider: provider,
-	}
-
-	apiRestSearch3Subsonic.Handler = func(w http.ResponseWriter, r *http.Request) {
-		handlers.Search3Handler(w, r, &dabClient)
-	}
-
-	return apiRestSearch3Subsonic
-}
-
-// Naming format: Middleware<ROUTE_PREFIX><ROUTE_POSTFIX><SERVICE>
-// Example: /api/song = MiddlewareApiSongNavidrome
-func MiddlewareApiSongNavidrome(provider *lib.NavidromeExtProvider) lib.ProviderHandler {
-	type SearchResponse struct {
-		Tracks []dabtypes.DabTrack `json:"tracks"`
-	}
-
-	apiSongNavidromeHandler := lib.ProviderHandler{
-		Method:   "GET",
-		SrcPaths: []string{"/api/song"},
-		DstPath:  "/api/search",
-		Provider: provider,
-	}
-
-	apiSongNavidromeHandler.Handler = func(w http.ResponseWriter, r *http.Request) {
-		handlers.ApiSong(w, r, &dabClient)
-	}
-
-	return apiSongNavidromeHandler
-}
-
-func MiddlwareRestStreamSubsonic(provider *lib.NavidromeExtProvider) lib.ProviderHandler {
-	apiRestStreamSubsonic := lib.ProviderHandler{
-		Method:   "GET",
-		SrcPaths: []string{"/rest/stream"},
-		DstPath:  "/api/stream",
-		Provider: provider,
-	}
-
-	apiRestStreamSubsonic.Handler = func(w http.ResponseWriter, r *http.Request) {
-		handlers.Stream(w, r, &dabClient)
-	}
-
-	return apiRestStreamSubsonic
-}
-
-// TODO, NOTE: If I have two endpoints like `/rest/getCoverArt` and `/rest/getCovertArtView` which are similar or
-// even equal i can create two different providers and assign the same handler to them
-func MiddlewareRestGetCoverArtView(provider *lib.NavidromeExtProvider) lib.ProviderHandler {
-	apiGetCoverArtSubsonic := lib.ProviderHandler{
-		Method:   "GET",
-		SrcPaths: []string{"/rest/getCoverArt.view", "/rest/getCoverArt"},
-		DstPath:  "", // TODO: this should be also settable to null to avoid automatic forward to that endpoint
-		Provider: provider,
-	}
-
-	apiGetCoverArtSubsonic.Handler = func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetCoverArt(w, r, &dabClient)
-	}
-
-	return apiGetCoverArtSubsonic
 }
 
 func DabMusicProvider() *lib.NavidromeExtProvider {
@@ -100,11 +18,51 @@ func DabMusicProvider() *lib.NavidromeExtProvider {
 		BaseUrl: "https://dabmusic.xyz",
 	}
 
-	apiLoginNavidromeHandler := MiddlewareApiLoginNavidrome(&dabMusicProvider)
-	apiSongNavidromeHandler := MiddlewareApiSongNavidrome(&dabMusicProvider)
-	apiRestSearch3Subsonic := MiddlewareRestSearch3Subsonic(&dabMusicProvider)
-	apiGetCoverArtViewSubsonicHandler := MiddlewareRestGetCoverArtView(&dabMusicProvider)
-	apiStreamSubsonicHandler := MiddlwareRestStreamSubsonic(&dabMusicProvider)
+	apiLoginNavidromeHandler := dabMusicProvider.CreateProviderHandler(
+		"POST",
+		[]string{"/auth/login"},
+		handlers.LoginHandler,
+	)
+
+	apiSongNavidromeHandler := dabMusicProvider.CreateProviderHandler(
+		"GET",
+		[]string{"/api/song"},
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.ApiSong(w, r, &dabClient)
+		},
+	)
+
+	apiRestSearch3Subsonic := dabMusicProvider.CreateProviderHandler(
+		"GET",
+		[]string{"/rest/search3.view", "/rest/search3"},
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.Search3Handler(w, r, &dabClient)
+		},
+	)
+
+	apiGetCoverArtViewSubsonicHandler := dabMusicProvider.CreateProviderHandler(
+		"GET",
+		[]string{"/rest/getCoverArt.view", "/rest/getCoverArt"},
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.GetCoverArt(w, r, &dabClient)
+		},
+	)
+
+	apiStreamSubsonicHandler := dabMusicProvider.CreateProviderHandler(
+		"GET",
+		[]string{"/rest/stream"},
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.Stream(w, r, &dabClient)
+		},
+	)
+
+	apiRestAlbumHandler := dabMusicProvider.CreateProviderHandler(
+		"GET",
+		[]string{"/rest/getAlbum"},
+		func(w http.ResponseWriter, r *http.Request) {
+			handlers.GetAlbum(w, r, &dabClient)
+		},
+	)
 
 	dabMusicProvider.Handlers = []lib.ProviderHandler{
 		apiLoginNavidromeHandler,
@@ -112,6 +70,7 @@ func DabMusicProvider() *lib.NavidromeExtProvider {
 		apiRestSearch3Subsonic,
 		apiGetCoverArtViewSubsonicHandler,
 		apiStreamSubsonicHandler,
+		apiRestAlbumHandler,
 	}
 
 	return &dabMusicProvider
