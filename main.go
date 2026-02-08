@@ -39,8 +39,10 @@ func main() {
 
 	// Now, for example purposes using the dabmusic provider
 	mw := lib.NewMiddleware(dabMusicProvider, &lib.NavidromeExtProviderOptions{
-		DownloadHandler: func(w http.ResponseWriter, r *http.Request) {
-			handlers.DownloadHandler(w, r, dw)
+		DownloadHandler: func(downloadsChan chan map[string]int) http.HandlerFunc {
+			return func(w http.ResponseWriter, r *http.Request) {
+				handlers.DownloadHandler(w, r, dw, downloadsChan)
+			}
 		},
 	})
 	mw.RunServer()
