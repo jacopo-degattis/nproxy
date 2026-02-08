@@ -18,6 +18,7 @@ func downloadTrack(
 	trackMetadata *types.DabTrack,
 	client *client.DabClient,
 	dw *downloader.Downloader,
+	downloadsChan chan map[string]int,
 ) error {
 	_, err := os.Stat(path + trackMetadata.Title + ".mp3")
 	if err == nil {
@@ -31,7 +32,16 @@ func downloadTrack(
 	}
 
 	fileName := fmt.Sprintf("%s/%s.mp3", path, trackMetadata.Title)
-	dw.DownloadFrom(*streamUrl, fileName)
+	dw.DownloadFrom(
+		*streamUrl,
+		fileName,
+		func(currentProgress int) {
+			downloadsChan <- map[string]int{
+				"id":       int(trackMetadata.Id),
+				"progress": currentProgress,
+			}
+		},
+	)
 	utils.AddMetadata(fileName, trackMetadata)
 
 	return nil
@@ -48,6 +58,7 @@ func DownloadHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 	dw downloader.Downloader,
+	downloadsChan chan map[string]int,
 ) {
 	// TODO: as a feature it would be nice to be able to keep track of download progress so find a way
 
@@ -91,7 +102,7 @@ func DownloadHandler(
 
 		for _, t := range albumInfos.Tracks {
 			fmt.Printf("Downloading track: %s\n", t.Title)
-			error = downloadTrack(fullAlbumDownloadPath, &t, &client, &dw)
+			error = downloadTrack(fullAlbumDownloadPath, &t, &client, &dw, downloadsChan)
 
 			if error != nil {
 				errors = append(errors, int(t.Id))
@@ -104,6 +115,7 @@ func DownloadHandler(
 			return
 		}
 	case "track":
+		fmt.Println("IN HERE")
 		trackMetadata, error := client.GetTrackMetadata(resId)
 
 		if error != nil {
@@ -124,13 +136,20 @@ func DownloadHandler(
 			return
 		}
 
-		err := downloadTrack(fullTrackDownloadPath, trackMetadata, &client, &dw)
+		err := downloadTrack(
+			fullTrackDownloadPath,
+			trackMetadata,
+			&client,
+			&dw,
+			downloadsChan,
+		)
 
 		if err != nil {
 			w.WriteHeader(500)
 			w.Write([]byte(err.Error()))
 			return
 		}
+		close(downloadsChan)
 	default:
 		error := "downloadType must be either `album` or `track`"
 		w.Write([]byte(error))

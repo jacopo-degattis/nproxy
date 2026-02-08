@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/http"
@@ -18,7 +19,11 @@ type Downloader struct {
 
 // TODO: maybe add support for custom headers
 // Also I delegate folder structure and folding to the caller instead of the downloader package
-func (dw *Downloader) DownloadFrom(resUrl string, outputName string) error {
+func (dw *Downloader) DownloadFrom(
+	resUrl string,
+	outputName string,
+	progressCallback func(downloadProgress int),
+) error {
 	rootDownloadLocation := dw.DownloadDir
 	req, err := http.NewRequest("GET", resUrl, nil)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
@@ -28,10 +33,21 @@ func (dw *Downloader) DownloadFrom(resUrl string, outputName string) error {
 	}
 
 	res, err := dw.Client.Do(req)
+
 	if err != nil {
 		return fmt.Errorf("downloader: %s", err.Error())
 	}
 	defer res.Body.Close()
+
+	finalBuffer := make([]byte, 0)
+	totalSize, _ := strconv.Atoi(res.Header.Get("Content-Length"))
+	scanner := bufio.NewScanner(res.Body)
+	for scanner.Scan() {
+		content := scanner.Bytes()
+
+		finalBuffer = append(finalBuffer[:], content[:]...)
+		progressCallback(int(len(finalBuffer) * 100 / totalSize))
+	}
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("downloader: request failed with status code %d", res.StatusCode)
