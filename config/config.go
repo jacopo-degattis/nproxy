@@ -9,7 +9,7 @@ var Env = map[string]string{
 	"HOST": os.Getenv("HOST"),
 	// Port is the port to run the server onto (ex. 3000)
 	"PORT":           os.Getenv("PORT"),
-	"REDIS_URL":      os.Getenv("REDIS_DB"),
+	"REDIS_URL":      os.Getenv("REDIS_URL"),
 	"REDIS_PASSWORD": os.Getenv("REDIS_PASSWORD"),
 	"NAVIDROME_URL":  os.Getenv("NAVIDROME_URL"),
 	"DAB_ENDPOINT":   os.Getenv("DAB_ENDPOINT"),
